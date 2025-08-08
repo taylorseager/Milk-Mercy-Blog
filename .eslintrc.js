@@ -16,6 +16,7 @@ module.exports = {
     'no-unused-vars': 'error',
     'react/jsx-props-no-spreading': 'off',
     'react/react-in-jsx-scope': 'off',
+    'react/no-unknown-property': ['error', { ignore: ['jsx', 'global'] }],
     'no-alert': 'off',
     'react/jsx-filename-extension': [
       1,
