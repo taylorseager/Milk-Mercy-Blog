@@ -1,27 +1,42 @@
-import { Button } from 'react-bootstrap';
-import { signOut } from '../utils/auth';
-import { useAuth } from '../utils/context/authContext';
+/* eslint-disable react/prop-types */
+import Head from 'next/head';
+import BlogCard from '../components/BlogCard';
+import { getSortedPostsData } from '../lib/posts';
 
-function Home() {
-  const { user } = useAuth();
+export default function Home({ allPostsData }) {
   return (
-    <div
-      className="text-center d-flex flex-column justify-content-center align-content-center"
-      style={{
-        height: '90vh',
-        padding: '30px',
-        maxWidth: '400px',
-        margin: '0 auto',
-      }}
-    >
-      <h1>Hello {user.fbUser.displayName}! </h1>
-      <p>Your Bio: {user.bio}</p>
-      <p>Click the button below to logout!</p>
-      <Button variant="danger" type="button" size="lg" className="copy-btn" onClick={signOut}>
-        Sign Out
-      </Button>
-    </div>
+    <>
+      <Head>
+        <title>Milk & Mercy - A Blog</title>
+        <meta name="description" content="Thoughts, stories, and reflections" />
+      </Head>
+
+      <section className="hero">
+        <h1>Welcome to Milk & Mercy</h1>
+        <p className="subtitle">Thoughts, stories, and reflections on life, faith, and everything in between.</p>
+      </section>
+
+      <section className="posts-section">
+        <h2>Recent Posts</h2>
+        {allPostsData.length === 0 ? (
+          <p className="no-posts">No posts yet. Check back soon!</p>
+        ) : (
+          <div className="posts-grid">
+            {allPostsData.map((post) => (
+              <BlogCard key={post.slug} post={post} />
+            ))}
+          </div>
+        )}
+      </section>
+    </>
   );
 }
 
-export default Home;
+export async function getStaticProps() {
+  const allPostsData = getSortedPostsData();
+  return {
+    props: {
+      allPostsData,
+    },
+  };
+}
