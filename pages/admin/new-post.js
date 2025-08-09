@@ -45,20 +45,28 @@ export default function NewPost() {
     }
   }, [router]);
 
+  const sizeOptions = [];
+  for (let i = 10; i <= 150; i += 5) {
+    sizeOptions.push(`${i}pt`);
+  }
+
   const modules = {
-    toolbar: [
-      [{ header: [1, 2, 3, 4, 5, 6, false] }],
-      [{ font: [] }],
-      [{ size: ['8px', '10px', '12px', '14px', '16px', '18px', '20px', '24px', '32px', '42px'] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ color: [] }, { background: [] }],
-      [{ align: [] }],
-      [{ list: 'ordered' }, { list: 'bullet' }],
-      ['blockquote', 'code-block'],
-      ['link', 'image', 'video'],
-      [{ indent: '-1' }, { indent: '+1' }],
-      ['clean'],
-    ],
+    toolbar: {
+      container: [
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+        [{ font: [] }],
+        [{ size: sizeOptions }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ color: [] }, { background: [] }],
+        [{ align: [] }],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        ['blockquote', 'code-block'],
+        ['link', 'image', 'video'],
+        [{ indent: '-1' }, { indent: '+1' }],
+        ['clean'],
+      ],
+      handlers: {},
+    },
   };
 
   const formats = [
@@ -382,6 +390,42 @@ export default function NewPost() {
         .editor-wrapper:focus-within {
           border-color: var(--link-color);
         }
+
+        /* Tooltips for editor buttons */
+        .ql-toolbar button:hover::after {
+          content: attr(title);
+          position: absolute;
+          bottom: -30px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #333;
+          color: white;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 12px;
+          white-space: nowrap;
+          z-index: 1000;
+          pointer-events: none;
+        }
+
+        .ql-toolbar button {
+          position: relative;
+        }
+
+        .ql-bold::after { content: 'Bold (Ctrl+B)' !important; }
+        .ql-italic::after { content: 'Italic (Ctrl+I)' !important; }
+        .ql-underline::after { content: 'Underline (Ctrl+U)' !important; }
+        .ql-strike::after { content: 'Strikethrough' !important; }
+        .ql-link::after { content: 'Insert Link' !important; }
+        .ql-image::after { content: 'Insert Image' !important; }
+        .ql-video::after { content: 'Insert Video' !important; }
+        .ql-clean::after { content: 'Clear Formatting' !important; }
+        .ql-list[value="ordered"]::after { content: 'Numbered List' !important; }
+        .ql-list[value="bullet"]::after { content: 'Bullet List' !important; }
+        .ql-blockquote::after { content: 'Blockquote' !important; }
+        .ql-code-block::after { content: 'Code Block' !important; }
+        .ql-indent[value="-1"]::after { content: 'Decrease Indent' !important; }
+        .ql-indent[value="+1"]::after { content: 'Increase Indent' !important; }
       `}
       </style>
     </>

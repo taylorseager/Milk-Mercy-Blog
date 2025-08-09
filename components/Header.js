@@ -14,8 +14,8 @@ export default function Header() {
           <Link href="/about">
             About
           </Link>
-          <Link href="/admin">
-            Admin
+          <Link href="/login">
+            Login
           </Link>
         </nav>
       </div>
