@@ -12,6 +12,22 @@ export default function NewPost() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [draftId, setDraftId] = useState(null);
+
+  const loadDraft = async (id) => {
+    try {
+      const response = await fetch(`/api/drafts?id=${id}`);
+      if (response.ok) {
+        const draftData = await response.json();
+        setTitle(draftData.title);
+        setContent(draftData.content);
+        setDraftId(id);
+      }
+    } catch (error) {
+      console.error('Error loading draft:', error);
+    }
+  };
 
   useEffect(() => {
     // Check if user is authenticated
@@ -21,13 +37,19 @@ export default function NewPost() {
         router.push('/admin');
       }
     }
+
+    // Check if editing existing draft
+    const { draft } = router.query;
+    if (draft) {
+      loadDraft(draft);
+    }
   }, [router]);
 
   const modules = {
     toolbar: [
       [{ header: [1, 2, 3, 4, 5, 6, false] }],
       [{ font: [] }],
-      [{ size: ['small', false, 'large', 'huge'] }],
+      [{ size: ['8px', '10px', '12px', '14px', '16px', '18px', '20px', '24px', '32px', '42px'] }],
       ['bold', 'italic', 'underline', 'strike'],
       [{ color: [] }, { background: [] }],
       [{ align: [] }],
@@ -60,7 +82,44 @@ export default function NewPost() {
     'indent',
   ];
 
-  const handleSubmit = async (e) => {
+  const handleSaveDraft = async () => {
+    if (!title.trim()) {
+      alert('Please enter a title');
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const response = await fetch('/api/drafts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: draftId,
+          title,
+          content,
+          lastModified: new Date().toISOString(),
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setDraftId(data.id);
+        alert('Draft saved successfully!');
+      } else {
+        alert('Failed to save draft. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      alert('An error occurred. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handlePublish = async (e) => {
     e.preventDefault();
 
     if (!title.trim() || !content.trim()) {
@@ -81,6 +140,7 @@ export default function NewPost() {
           content,
           date: new Date().toISOString().split('T')[0],
           excerpt: content.replace(/<[^>]*>/g, '').substring(0, 150),
+          draftId, // Include draft ID to delete after publishing
         }),
       });
 
@@ -107,7 +167,7 @@ export default function NewPost() {
       <div className="admin-container">
         <h1>Create New Blog Post</h1>
 
-        <form onSubmit={handleSubmit} className="post-form">
+        <form onSubmit={handlePublish} className="post-form">
           <div className="form-group">
             <label htmlFor="title">Post Title</label>
             <input
@@ -135,15 +195,35 @@ export default function NewPost() {
               />
             </div>
           </div>
+        </form>
+
+        <div className="button-container">
+          <button
+            type="button"
+            onClick={handleSaveDraft}
+            disabled={isSaving}
+            className="save-button"
+          >
+            {isSaving ? 'Saving...' : 'Save Draft'}
+          </button>
 
           <button
-            type="submit"
+            type="button"
+            onClick={() => router.push('/admin/drafts')}
+            className="drafts-button"
+          >
+            View Drafts
+          </button>
+
+          <button
+            type="button"
+            onClick={handlePublish}
             disabled={isSubmitting}
-            className="submit-button"
+            className="publish-button"
           >
             {isSubmitting ? 'Publishing...' : 'Publish Post'}
           </button>
-        </form>
+        </div>
       </div>
 
       <style jsx>{`
@@ -163,7 +243,7 @@ export default function NewPost() {
           border-radius: 8px;
           box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
           padding: 30px;
-          position: relative;
+          margin-bottom: 30px;
         }
 
         .form-group {
@@ -197,10 +277,49 @@ export default function NewPost() {
           overflow: hidden;
         }
 
-        .submit-button {
-          position: absolute;
-          bottom: 30px;
-          right: 30px;
+        .button-container {
+          display: flex;
+          justify-content: flex-end;
+          gap: 15px;
+          padding: 20px 30px;
+          background: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .save-button {
+          background-color: #28a745;
+          color: white;
+          border: none;
+          padding: 12px 30px;
+          font-size: 16px;
+          font-weight: 600;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+
+        .save-button:hover:not(:disabled) {
+          background-color: #218838;
+        }
+
+        .drafts-button {
+          background-color: #6c757d;
+          color: white;
+          border: none;
+          padding: 12px 30px;
+          font-size: 16px;
+          font-weight: 600;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+
+        .drafts-button:hover {
+          background-color: #5a6268;
+        }
+
+        .publish-button {
           background-color: #dc3545;
           color: white;
           border: none;
@@ -212,20 +331,25 @@ export default function NewPost() {
           transition: background-color 0.2s;
         }
 
-        .submit-button:hover:not(:disabled) {
+        .publish-button:hover:not(:disabled) {
           background-color: #c82333;
         }
 
-        .submit-button:disabled {
+        .save-button:disabled,
+        .publish-button:disabled {
           opacity: 0.6;
           cursor: not-allowed;
         }
 
         @media (max-width: 768px) {
-          .submit-button {
-            position: static;
+          .button-container {
+            flex-direction: column;
+          }
+
+          .save-button,
+          .drafts-button,
+          .publish-button {
             width: 100%;
-            margin-top: 20px;
           }
         }
       `}

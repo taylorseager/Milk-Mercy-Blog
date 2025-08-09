@@ -5,7 +5,7 @@ export default function handler(req, res) {
   if (req.method === 'POST') {
     try {
       const {
-        title, content, date, excerpt,
+        title, content, date, excerpt, draftId,
       } = req.body;
 
       // Create slug from title
@@ -33,6 +33,15 @@ ${content}`;
       // Write the file
       const filePath = path.join(postsDir, `${slug}.md`);
       fs.writeFileSync(filePath, markdownContent);
+
+      // If this was published from a draft, delete the draft
+      if (draftId) {
+        const draftsDir = path.join(process.cwd(), 'drafts');
+        const draftPath = path.join(draftsDir, `${draftId}.json`);
+        if (fs.existsSync(draftPath)) {
+          fs.unlinkSync(draftPath);
+        }
+      }
 
       res.status(200).json({ slug, message: 'Post created successfully' });
     } catch (error) {
