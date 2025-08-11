@@ -5,7 +5,9 @@ export default function BlogCard({ post }) {
   return (
     <article className="blog-card">
       <Link href={`/blog/${post.slug}`} passHref>
-        <h2>{post.title}</h2>
+        <a href={`/blog/${post.slug}`}>
+          <h2>{post.title}</h2>
+        </a>
       </Link>
       <div className="blog-meta">
         <time dateTime={post.date}>
@@ -17,8 +19,8 @@ export default function BlogCard({ post }) {
         </time>
       </div>
       <p className="blog-excerpt">{post.excerpt}</p>
-      <Link href={`/blog/${post.slug}`} className="read-more">
-        Read more →
+      <Link href={`/blog/${post.slug}`} passHref>
+        <a href={`/blog/${post.slug}`} className="read-more">Read more →</a>
       </Link>
     </article>
   );

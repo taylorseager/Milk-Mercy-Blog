@@ -2,7 +2,7 @@
 /* eslint-disable react/no-danger */
 import Head from 'next/head';
 import { getAllPostSlugs, getPostData } from '../../lib/posts';
-import Comments from '../../components/Comments';
+// import Comments from '../../components/Comments';
 
 export default function Post({ postData }) {
   return (
@@ -29,7 +29,7 @@ export default function Post({ postData }) {
           dangerouslySetInnerHTML={{ __html: postData.contentHtml }}
         />
 
-        <Comments slug={postData.slug} />
+        {/* <Comments slug={postData.slug} /> */}
       </article>
 
       <style jsx>{`

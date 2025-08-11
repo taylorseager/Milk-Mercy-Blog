@@ -392,8 +392,12 @@ export default function NewPost() {
         }
 
         /* Tooltips for editor buttons */
-        .ql-toolbar button:hover::after {
-          content: attr(title);
+        .ql-toolbar button {
+          position: relative;
+        }
+
+        .ql-toolbar button::after {
+          content: '';
           position: absolute;
           bottom: -30px;
           left: 50%;
@@ -406,26 +410,36 @@ export default function NewPost() {
           white-space: nowrap;
           z-index: 1000;
           pointer-events: none;
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.2s, visibility 0.2s;
         }
 
-        .ql-toolbar button {
-          position: relative;
+        .ql-toolbar button:hover::after {
+          opacity: 1;
+          visibility: visible;
         }
 
-        .ql-bold::after { content: 'Bold (Ctrl+B)' !important; }
-        .ql-italic::after { content: 'Italic (Ctrl+I)' !important; }
-        .ql-underline::after { content: 'Underline (Ctrl+U)' !important; }
-        .ql-strike::after { content: 'Strikethrough' !important; }
-        .ql-link::after { content: 'Insert Link' !important; }
-        .ql-image::after { content: 'Insert Image' !important; }
-        .ql-video::after { content: 'Insert Video' !important; }
-        .ql-clean::after { content: 'Clear Formatting' !important; }
-        .ql-list[value="ordered"]::after { content: 'Numbered List' !important; }
-        .ql-list[value="bullet"]::after { content: 'Bullet List' !important; }
-        .ql-blockquote::after { content: 'Blockquote' !important; }
-        .ql-code-block::after { content: 'Code Block' !important; }
-        .ql-indent[value="-1"]::after { content: 'Decrease Indent' !important; }
-        .ql-indent[value="+1"]::after { content: 'Increase Indent' !important; }
+        .ql-bold:hover::after { content: 'Bold (Ctrl+B)'; }
+        .ql-italic:hover::after { content: 'Italic (Ctrl+I)'; }
+        .ql-underline:hover::after { content: 'Underline (Ctrl+U)'; }
+        .ql-strike:hover::after { content: 'Strikethrough'; }
+        .ql-link:hover::after { content: 'Insert Link'; }
+        .ql-image:hover::after { content: 'Insert Image'; }
+        .ql-video:hover::after { content: 'Insert Video'; }
+        .ql-clean:hover::after { content: 'Clear Formatting'; }
+        .ql-list[value="ordered"]:hover::after { content: 'Numbered List'; }
+        .ql-list[value="bullet"]:hover::after { content: 'Bullet List'; }
+        .ql-blockquote:hover::after { content: 'Blockquote'; }
+        .ql-code-block:hover::after { content: 'Code Block'; }
+        .ql-indent[value="-1"]:hover::after { content: 'Decrease Indent'; }
+        .ql-indent[value="+1"]:hover::after { content: 'Increase Indent'; }
+        .ql-header:hover::after { content: 'Header'; }
+        .ql-font:hover::after { content: 'Font'; }
+        .ql-size:hover::after { content: 'Font Size'; }
+        .ql-color:hover::after { content: 'Text Color'; }
+        .ql-background:hover::after { content: 'Background Color'; }
+        .ql-align:hover::after { content: 'Text Alignment'; }
       `}
       </style>
     </>

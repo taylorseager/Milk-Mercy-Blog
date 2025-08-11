@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
+// import Link from 'next/link';
 
 export default function Comments({ slug }) {
   const [comments, setComments] = useState([]);
@@ -120,7 +120,7 @@ export default function Comments({ slug }) {
         ) : (
           <div className="login-prompt">
             <p>You must be logged in to leave a comment.</p>
-            <Link href="/login" className="login-link">Login or Register</Link>
+            {/* <LoginForm onLogin={(userData) => setUser(userData)} /> */}
           </div>
         )}
       </div>

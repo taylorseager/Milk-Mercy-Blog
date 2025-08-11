@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 
-const ADMIN_HASH = 'admin123'; // In production, this should be more secure
+const ADMIN_HASH = 'Avery2025';
 
 export default function AdminLogin() {
   const [password, setPassword] = useState('');
@@ -59,13 +59,24 @@ export default function AdminLogin() {
 
             <div className="admin-actions">
               <Link href="/admin/new-post" className="action-card" passHref>
-                <h3>Create New Post</h3>
-                <p>Write and publish a new blog post</p>
+                <div>
+                  <h3>Create New Post</h3>
+                  <p>Write and publish a new blog post</p>
+                </div>
               </Link>
 
               <Link href="/admin/drafts" className="action-card" passHref>
-                <h3>Manage Drafts</h3>
-                <p>View and edit your saved drafts</p>
+                <div>
+                  <h3>Manage Drafts</h3>
+                  <p>View and edit your saved drafts</p>
+                </div>
+              </Link>
+
+              <Link href="/admin/settings" className="action-card" passHref>
+                <div>
+                  <h3>Site Settings</h3>
+                  <p>Edit site name, homepage, and more</p>
+                </div>
               </Link>
             </div>
           </div>
@@ -122,7 +133,7 @@ export default function AdminLogin() {
           .admin-actions {
             display: grid;
             gap: 20px;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
           }
 
           .action-card {

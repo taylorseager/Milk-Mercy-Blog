@@ -3,6 +3,25 @@ import Link from 'next/link';
 
 export default function Footer() {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [siteName, setSiteName] = useState('Milk & Mercy');
+  const [footerText, setFooterText] = useState('All rights reserved.');
+
+  const loadFooterSettings = async () => {
+    try {
+      const response = await fetch('/api/settings');
+      if (response.ok) {
+        const settings = await response.json();
+        if (settings.siteName) {
+          setSiteName(settings.siteName);
+        }
+        if (settings.footerText) {
+          setFooterText(settings.footerText);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading footer settings:', error);
+    }
+  };
 
   useEffect(() => {
     // Check if admin is logged in
@@ -10,13 +29,16 @@ export default function Footer() {
       const adminAuth = sessionStorage.getItem('adminAuth');
       setIsAdmin(adminAuth === 'true');
     }
+
+    // Load footer settings
+    loadFooterSettings();
   }, []);
 
   return (
     <footer className="footer">
       <div className="container">
         <div className="footer-content">
-          <p>&copy; {new Date().getFullYear()} Milk & Mercy. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} {siteName}. {footerText}</p>
           {isAdmin && (
             <Link href="/admin" className="admin-link">
               Admin
