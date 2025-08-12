@@ -344,6 +344,32 @@ a:hover {
   margin-bottom: 20px;
 }
 
+/* Quill Editor Indent Classes for Published Posts */
+.ql-indent-1 { 
+  padding-left: 3em !important; 
+}
+.ql-indent-2 { 
+  padding-left: 6em !important; 
+}
+.ql-indent-3 { 
+  padding-left: 9em !important; 
+}
+.ql-indent-4 { 
+  padding-left: 12em !important; 
+}
+.ql-indent-5 { 
+  padding-left: 15em !important; 
+}
+.ql-indent-6 { 
+  padding-left: 18em !important; 
+}
+.ql-indent-7 { 
+  padding-left: 21em !important; 
+}
+.ql-indent-8 { 
+  padding-left: 24em !important; 
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .hero h1 {
@@ -369,5 +395,19 @@ a:hover {
   
   .nav {
     gap: 20px;
+  }
+
+  /* Mobile indent adjustments */
+  .ql-indent-1 { 
+    padding-left: 2em !important; 
+  }
+  .ql-indent-2 { 
+    padding-left: 4em !important; 
+  }
+  .ql-indent-3 { 
+    padding-left: 6em !important; 
+  }
+  .ql-indent-4 { 
+    padding-left: 8em !important; 
   }
 }

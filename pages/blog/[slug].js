@@ -1,10 +1,23 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/no-danger */
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { getAllPostSlugs, getPostData } from '../../lib/posts';
+import 'react-quill/dist/quill.snow.css';
 // import Comments from '../../components/Comments';
 
 export default function Post({ postData }) {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    // Check if admin is logged in
+    if (typeof window !== 'undefined') {
+      const adminAuth = sessionStorage.getItem('adminAuth');
+      setIsAdmin(adminAuth === 'true');
+    }
+  }, []);
+
   return (
     <>
       <Head>
@@ -22,6 +35,11 @@ export default function Post({ postData }) {
               day: 'numeric',
             })}
           </time>
+          {isAdmin && (
+            <Link href={`/admin/edit-post?slug=${postData.slug}`} className="edit-button">
+              ✏️ Edit Post
+            </Link>
+          )}
         </header>
 
         <div
@@ -57,6 +75,25 @@ export default function Post({ postData }) {
           color: var(--text-light);
           font-size: 1rem;
           font-weight: 500;
+        }
+
+        .edit-button {
+          display: inline-block;
+          margin-top: 20px;
+          padding: 10px 20px;
+          background-color: var(--link-color);
+          color: white;
+          text-decoration: none;
+          border-radius: 6px;
+          font-size: 14px;
+          font-weight: 600;
+          transition: all 0.2s;
+          border: 2px solid var(--link-color);
+        }
+
+        .edit-button:hover {
+          background-color: transparent;
+          color: var(--link-color);
         }
 
         .post-content {
@@ -117,6 +154,37 @@ export default function Post({ postData }) {
           padding: 0;
         }
 
+        .post-content ul,
+        .post-content ol {
+          margin: 1.5em 0;
+          padding-left: 2em;
+        }
+
+        .post-content li {
+          margin-bottom: 0.5em;
+          line-height: 1.6;
+          display: list-item;
+          visibility: visible;
+          opacity: 1;
+        }
+
+        .post-content ul ul,
+        .post-content ol ol,
+        .post-content ul ol,
+        .post-content ol ul {
+          margin: 0.5em 0;
+        }
+
+        /* Quill editor indent classes - using the same approach as Quill */
+        .post-content .ql-indent-1 { padding-left: 3em; }
+        .post-content .ql-indent-2 { padding-left: 6em; }
+        .post-content .ql-indent-3 { padding-left: 9em; }
+        .post-content .ql-indent-4 { padding-left: 12em; }
+        .post-content .ql-indent-5 { padding-left: 15em; }
+        .post-content .ql-indent-6 { padding-left: 18em; }
+        .post-content .ql-indent-7 { padding-left: 21em; }
+        .post-content .ql-indent-8 { padding-left: 24em; }
+
         @media (max-width: 768px) {
           .post-header h1 {
             font-size: 2rem;
@@ -125,6 +193,12 @@ export default function Post({ postData }) {
           .post-content {
             font-size: 1rem;
           }
+
+          /* Reduce indent spacing on mobile */
+          .post-content .ql-indent-1 { padding-left: 2em; }
+          .post-content .ql-indent-2 { padding-left: 4em; }
+          .post-content .ql-indent-3 { padding-left: 6em; }
+          .post-content .ql-indent-4 { padding-left: 8em; }
         }
       `}
       </style>
