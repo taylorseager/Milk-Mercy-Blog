@@ -1,6 +1,7 @@
 /* eslint-disable react/no-danger */
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
 import 'react-quill/dist/quill.snow.css';
@@ -173,7 +174,12 @@ export default function NewPost() {
       </Head>
 
       <div className="admin-container">
-        <h1>Create New Blog Post</h1>
+        <div className="header">
+          <h1>Create New Blog Post</h1>
+          <Link href="/admin" className="back-button">
+            ← Back to Dashboard
+          </Link>
+        </div>
 
         <form onSubmit={handlePublish} className="post-form">
           <div className="form-group">
@@ -241,9 +247,31 @@ export default function NewPost() {
           padding: 40px 20px;
         }
 
+        .header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 40px;
+        }
+
         h1 {
           color: var(--primary-color);
-          margin-bottom: 40px;
+          margin: 0;
+        }
+
+        .back-button {
+          color: var(--link-color);
+          text-decoration: none;
+          font-size: 14px;
+          padding: 8px 16px;
+          border: 1px solid var(--link-color);
+          border-radius: 4px;
+          transition: all 0.2s;
+        }
+
+        .back-button:hover {
+          background: var(--link-color);
+          color: white;
         }
 
         .post-form {
@@ -350,6 +378,13 @@ export default function NewPost() {
         }
 
         @media (max-width: 768px) {
+          .header {
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            text-align: center;
+          }
+
           .button-container {
             flex-direction: column;
           }
