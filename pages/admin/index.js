@@ -58,26 +58,32 @@ export default function AdminLogin() {
             </div>
 
             <div className="admin-actions">
-              <Link href="/admin/new-post" className="action-card" passHref>
-                <div>
-                  <h3>Create New Post</h3>
-                  <p>Write and publish a new blog post</p>
-                </div>
-              </Link>
+              <div className="action-card-wrapper">
+                <Link href="/admin/new-post" passHref>
+                  <div>
+                    <h3>Create New Post</h3>
+                    <p>Write and publish a new blog post</p>
+                  </div>
+                </Link>
+              </div>
 
-              <Link href="/admin/drafts" className="action-card" passHref>
-                <div>
-                  <h3>Manage Drafts</h3>
-                  <p>View and edit your saved drafts</p>
-                </div>
-              </Link>
+              <div className="action-card-wrapper">
+                <Link href="/admin/drafts" passHref>
+                  <div>
+                    <h3>Manage Drafts</h3>
+                    <p>View and edit your saved drafts</p>
+                  </div>
+                </Link>
+              </div>
 
-              <Link href="/admin/settings" className="action-card" passHref>
-                <div>
-                  <h3>Site Settings</h3>
-                  <p>Edit site name, homepage, and more</p>
-                </div>
-              </Link>
+              <div className="action-card-wrapper">
+                <Link href="/admin/settings" passHref>
+                  <div>
+                    <h3>Site Settings</h3>
+                    <p>Edit site name, homepage, and more</p>
+                  </div>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -136,31 +142,42 @@ export default function AdminLogin() {
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
           }
 
-          .action-card {
-            display: block;
-            text-decoration: none;
-            background: #f8f9fa;
-            border: 2px solid #e1e4e8;
+          .action-card-wrapper {
+            background: white;
+            border: 2px solid var(--primary-color);
             border-radius: 8px;
             padding: 30px 20px;
             text-align: center;
             transition: all 0.2s;
-            color: inherit;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
           }
 
-          .action-card:hover {
+          .action-card-wrapper:hover {
             border-color: var(--link-color);
+            background: #f8f9fa;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
           }
 
-          .action-card h3 {
+          .action-card-wrapper a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+          }
+
+          .action-card-wrapper div {
+            width: 100%;
+            height: 100%;
+          }
+
+          .action-card-wrapper h3 {
             color: var(--primary-color);
             margin: 0 0 10px 0;
             font-size: 1.2rem;
           }
 
-          .action-card p {
+          .action-card-wrapper p {
             color: var(--text-light);
             margin: 0;
             font-size: 14px;
