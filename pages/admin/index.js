@@ -77,6 +77,15 @@ export default function AdminLogin() {
               </div>
 
               <div className="action-card-wrapper">
+                <Link href="/admin/manage-posts" passHref>
+                  <div>
+                    <h3>Manage Posts</h3>
+                    <p>View and delete published posts</p>
+                  </div>
+                </Link>
+              </div>
+
+              <div className="action-card-wrapper">
                 <Link href="/admin/settings" passHref>
                   <div>
                     <h3>Site Settings</h3>
