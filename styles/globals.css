@@ -128,6 +128,32 @@ a:hover {
   margin: 0 auto;
 }
 
+/* About Section */
+.about-section {
+  margin: 60px 0;
+  padding: 40px;
+  background: var(--background-alt);
+  border-radius: 8px;
+}
+
+.about-content {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.about-content h2 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: var(--primary-color);
+}
+
+.about-content p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--text-dark);
+}
+
 /* Posts Section */
 .posts-section {
   margin-top: 60px;
