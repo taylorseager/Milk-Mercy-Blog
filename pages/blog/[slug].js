@@ -175,15 +175,6 @@ export default function Post({ postData }) {
           margin: 0.5em 0;
         }
 
-        /* Quill editor indent classes - using the same approach as Quill */
-        .post-content .ql-indent-1 { padding-left: 3em; }
-        .post-content .ql-indent-2 { padding-left: 6em; }
-        .post-content .ql-indent-3 { padding-left: 9em; }
-        .post-content .ql-indent-4 { padding-left: 12em; }
-        .post-content .ql-indent-5 { padding-left: 15em; }
-        .post-content .ql-indent-6 { padding-left: 18em; }
-        .post-content .ql-indent-7 { padding-left: 21em; }
-        .post-content .ql-indent-8 { padding-left: 24em; }
 
         @media (max-width: 768px) {
           .post-header h1 {
@@ -194,11 +185,6 @@ export default function Post({ postData }) {
             font-size: 1rem;
           }
 
-          /* Reduce indent spacing on mobile */
-          .post-content .ql-indent-1 { padding-left: 2em; }
-          .post-content .ql-indent-2 { padding-left: 4em; }
-          .post-content .ql-indent-3 { padding-left: 6em; }
-          .post-content .ql-indent-4 { padding-left: 8em; }
         }
       `}
       </style>
