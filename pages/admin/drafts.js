@@ -117,7 +117,12 @@ export default function Drafts() {
 
       <div className="drafts-container">
         <div className="header">
-          <h1>Draft Posts</h1>
+          <div className="header-left">
+            <h1>Draft Posts</h1>
+            <Link href="/admin" className="back-button">
+              ← Back to Dashboard
+            </Link>
+          </div>
           <Link href="/admin/new-post" passHref>
             <button type="button" className="new-post-button">
               Create New Post
@@ -187,9 +192,31 @@ export default function Drafts() {
           margin-bottom: 40px;
         }
 
+        .header-left {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
         h1 {
           color: var(--primary-color);
           margin: 0;
+        }
+
+        .back-button {
+          color: var(--link-color);
+          text-decoration: none;
+          font-size: 14px;
+          padding: 8px 16px;
+          border: 1px solid var(--link-color);
+          border-radius: 4px;
+          transition: all 0.2s;
+          width: fit-content;
+        }
+
+        .back-button:hover {
+          background: var(--link-color);
+          color: white;
         }
 
         .new-post-button {
@@ -340,6 +367,15 @@ export default function Drafts() {
             flex-direction: column;
             gap: 20px;
             align-items: stretch;
+          }
+
+          .header-left {
+            align-items: center;
+            text-align: center;
+          }
+
+          .back-button {
+            align-self: center;
           }
 
           .draft-card {
