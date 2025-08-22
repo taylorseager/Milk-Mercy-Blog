@@ -89,7 +89,7 @@ export default function AdminLogin() {
                 <Link href="/admin/settings" passHref>
                   <div>
                     <h3>Site Settings</h3>
-                    <p>Edit site name, homepage, and more</p>
+                    <p>Edit site info, homepage, and layout</p>
                   </div>
                 </Link>
               </div>
