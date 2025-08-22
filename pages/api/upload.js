@@ -15,38 +15,47 @@ export default async function handler(req, res) {
   }
 
   try {
-    const form = new IncomingForm();
-    form.uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    form.keepExtensions = true;
-    form.maxFileSize = 10 * 1024 * 1024; // 10MB limit
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
 
     // Ensure upload directory exists
-    if (!fs.existsSync(form.uploadDir)) {
-      fs.mkdirSync(form.uploadDir, { recursive: true });
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
     }
 
-    const [, files] = await new Promise((resolve, reject) => {
-      form.parse(req, (err, formFields, formFiles) => {
-        if (err) reject(err);
-        else resolve([formFields, formFiles]);
-      });
+    const form = new IncomingForm({
+      uploadDir,
+      keepExtensions: true,
+      maxFileSize: 10 * 1024 * 1024, // 10MB limit
     });
 
-    const { file } = files;
+    const [, files] = await form.parse(req);
+
+    const { file: fileField } = files;
+
+    // Handle case where file might be an array
+    const [file] = Array.isArray(fileField) ? fileField : [fileField];
+
     if (!file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
     // Generate unique filename
     const timestamp = Date.now();
-    const originalName = file.originalFilename || 'upload';
+    const originalName = file.originalFilename || file.name || 'upload';
     const extension = path.extname(originalName);
     const basename = path.basename(originalName, extension);
     const newFilename = `${basename}-${timestamp}${extension}`;
-    const newPath = path.join(form.uploadDir, newFilename);
+    const newPath = path.join(uploadDir, newFilename);
+
+    // Get the temporary file path (formidable v3 uses different property names)
+    const tempPath = file.filepath || file.path;
+
+    if (!tempPath) {
+      return res.status(500).json({ error: 'Invalid file upload' });
+    }
 
     // Move file to final location
-    fs.renameSync(file.filepath, newPath);
+    fs.renameSync(tempPath, newPath);
 
     // Return the public URL
     const publicUrl = `/uploads/${newFilename}`;

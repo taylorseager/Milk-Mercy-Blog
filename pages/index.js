@@ -2,6 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 import Head from 'next/head';
+import Image from 'next/image';
 import BlogCard from '../components/BlogCard';
 import { getSortedPostsData } from '../lib/posts';
 
@@ -18,7 +19,13 @@ export default function Home({ allPostsData, settings }) {
       <section className="hero">
         {settings.heroImage && (
           <div className="hero-image">
-            <img src={settings.heroImage} alt="Hero" />
+            <Image
+              src={settings.heroImage}
+              alt="Hero"
+              fill
+              style={{ objectFit: 'cover' }}
+              priority
+            />
           </div>
         )}
         <div className="hero-content">
@@ -36,7 +43,14 @@ export default function Home({ allPostsData, settings }) {
             </div>
             {settings.aboutImage && (
               <div className="about-image">
-                <img src={settings.aboutImage} alt="About" />
+                <Image
+                  src={settings.aboutImage}
+                  alt="About"
+                  width={300}
+                  height={200}
+                  style={{ width: '100%', height: 'auto' }}
+                  sizes="(max-width: 768px) 100vw, 300px"
+                />
               </div>
             )}
           </div>
@@ -78,12 +92,6 @@ export default function Home({ allPostsData, settings }) {
           right: 0;
           bottom: 0;
           z-index: 1;
-        }
-
-        .hero-image img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
           opacity: 0.3;
         }
 
@@ -99,10 +107,9 @@ export default function Home({ allPostsData, settings }) {
           align-items: center;
         }
 
-        .about-image img {
-          width: 100%;
-          height: auto;
+        .about-image {
           border-radius: 8px;
+          overflow: hidden;
           box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 

@@ -1,8 +1,8 @@
 /* eslint-disable react/prop-types */
-/* eslint-disable @next/next/no-img-element */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 
 export default function SiteSettings() {
@@ -24,17 +24,17 @@ export default function SiteSettings() {
   const [uploading, setUploading] = useState('');
   const [message, setMessage] = useState('');
 
-  const loadSettings = async () => {
+  const loadSettings = useCallback(async () => {
     try {
       const response = await fetch('/api/settings');
       if (response.ok) {
         const data = await response.json();
-        setSettings({ ...settings, ...data });
+        setSettings((prevSettings) => ({ ...prevSettings, ...data }));
       }
     } catch (error) {
       console.error('Error loading settings:', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -48,7 +48,7 @@ export default function SiteSettings() {
 
     // Load current settings
     loadSettings();
-  }, [router]); // loadSettings is stable function
+  }, [router, loadSettings]);
 
   const handleChange = (e) => {
     const {
@@ -220,7 +220,13 @@ export default function SiteSettings() {
               <div className="image-upload-container">
                 {settings.heroImage ? (
                   <div className="image-preview">
-                    <img src={settings.heroImage} alt="Homepage background" />
+                    <Image
+                      src={settings.heroImage}
+                      alt="Homepage background"
+                      width={300}
+                      height={200}
+                      style={{ width: '100%', height: 'auto' }}
+                    />
                     <button
                       type="button"
                       onClick={() => removeImage('heroImage')}
@@ -294,7 +300,13 @@ export default function SiteSettings() {
               <div className="image-upload-container">
                 {settings.aboutImage ? (
                   <div className="image-preview">
-                    <img src={settings.aboutImage} alt="About section" />
+                    <Image
+                      src={settings.aboutImage}
+                      alt="About section"
+                      width={300}
+                      height={200}
+                      style={{ width: '100%', height: 'auto' }}
+                    />
                     <button
                       type="button"
                       onClick={() => removeImage('aboutImage')}
