@@ -1,8 +1,9 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
 import Link from 'next/link';
+import Image from 'next/image';
+import { useRouter } from 'next/router';
 
 export default function SiteSettings() {
   const router = useRouter();
@@ -13,21 +14,27 @@ export default function SiteSettings() {
     heroSubtitle: '',
     aboutText: '',
     footerText: '',
+    heroImage: '',
+    aboutImage: '',
+    logoImage: '',
+    maxPostsOnHomepage: 5,
+    showAboutSection: true,
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [uploading, setUploading] = useState('');
   const [message, setMessage] = useState('');
 
-  const loadSettings = async () => {
+  const loadSettings = useCallback(async () => {
     try {
       const response = await fetch('/api/settings');
       if (response.ok) {
         const data = await response.json();
-        setSettings(data);
+        setSettings((prevSettings) => ({ ...prevSettings, ...data }));
       }
     } catch (error) {
       console.error('Error loading settings:', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -41,13 +48,69 @@ export default function SiteSettings() {
 
     // Load current settings
     loadSettings();
-  }, [router]);
+  }, [router, loadSettings]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const {
+      name, value, type, checked,
+    } = e.target;
     setSettings((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
+  const handleFileUpload = async (e, imageType) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size must be less than 10MB');
+      return;
+    }
+
+    setUploading(imageType);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSettings((prev) => ({
+          ...prev,
+          [imageType]: data.url,
+        }));
+        setMessage('Image uploaded successfully!');
+        setTimeout(() => setMessage(''), 3000);
+      } else {
+        const error = await response.json();
+        alert(`Upload failed: ${error.error}`);
+      }
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      alert('An error occurred while uploading the file');
+    } finally {
+      setUploading('');
+    }
+  };
+
+  const removeImage = (imageType) => {
+    setSettings((prev) => ({
+      ...prev,
+      [imageType]: '',
     }));
   };
 
@@ -125,9 +188,9 @@ export default function SiteSettings() {
           </div>
 
           <div className="form-section">
-            <h2>Home Page</h2>
+            <h2>Homepage</h2>
             <div className="form-group">
-              <label htmlFor="heroTitle">Hero Title</label>
+              <label htmlFor="heroTitle">Title</label>
               <input
                 type="text"
                 id="heroTitle"
@@ -140,7 +203,7 @@ export default function SiteSettings() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="heroSubtitle">Hero Subtitle</label>
+              <label htmlFor="heroSubtitle">Subtitle</label>
               <textarea
                 id="heroSubtitle"
                 name="heroSubtitle"
@@ -153,7 +216,74 @@ export default function SiteSettings() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="aboutText">About Section</label>
+              <label htmlFor="heroImage">Background Image</label>
+              <div className="image-upload-container">
+                {settings.heroImage ? (
+                  <div className="image-preview">
+                    <Image
+                      src={settings.heroImage}
+                      alt="Homepage background"
+                      width={300}
+                      height={200}
+                      style={{ width: '100%', height: 'auto' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage('heroImage')}
+                      className="remove-image"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="upload-area">
+                    <input
+                      type="file"
+                      id="heroImage"
+                      accept="image/*"
+                      onChange={(e) => handleFileUpload(e, 'heroImage')}
+                      disabled={uploading === 'heroImage'}
+                    />
+                    <label htmlFor="heroImage" className="upload-label">
+                      {uploading === 'heroImage' ? 'Uploading...' : 'Choose Background Image'}
+                    </label>
+                  </div>
+                )}
+              </div>
+              <small>Background image for the homepage header (optional)</small>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="maxPostsOnHomepage">Number of Posts on Homepage</label>
+              <input
+                type="number"
+                id="maxPostsOnHomepage"
+                name="maxPostsOnHomepage"
+                value={settings.maxPostsOnHomepage}
+                onChange={handleChange}
+                min="1"
+                max="20"
+              />
+              <small>How many recent posts to show on the homepage</small>
+            </div>
+          </div>
+
+          <div className="form-section">
+            <h2>About Section</h2>
+            <div className="form-group">
+              <label>
+                <input
+                  type="checkbox"
+                  name="showAboutSection"
+                  checked={settings.showAboutSection}
+                  onChange={handleChange}
+                />
+                Show About Section on Homepage
+              </label>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="aboutText">About Text</label>
               <textarea
                 id="aboutText"
                 name="aboutText"
@@ -163,6 +293,44 @@ export default function SiteSettings() {
                 rows="4"
               />
               <small>A paragraph about your blog (appears on home page)</small>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="aboutImage">About Section Image</label>
+              <div className="image-upload-container">
+                {settings.aboutImage ? (
+                  <div className="image-preview">
+                    <Image
+                      src={settings.aboutImage}
+                      alt="About section"
+                      width={300}
+                      height={200}
+                      style={{ width: '100%', height: 'auto' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage('aboutImage')}
+                      className="remove-image"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="upload-area">
+                    <input
+                      type="file"
+                      id="aboutImage"
+                      accept="image/*"
+                      onChange={(e) => handleFileUpload(e, 'aboutImage')}
+                      disabled={uploading === 'aboutImage'}
+                    />
+                    <label htmlFor="aboutImage" className="upload-label">
+                      {uploading === 'aboutImage' ? 'Uploading...' : 'Choose About Image'}
+                    </label>
+                  </div>
+                )}
+              </div>
+              <small>Image to display alongside about text (optional)</small>
             </div>
           </div>
 
@@ -198,7 +366,7 @@ export default function SiteSettings() {
 
       <style jsx>{`
         .settings-container {
-          max-width: 800px;
+          max-width: 900px;
           margin: 0 auto;
           padding: 40px 20px;
         }
@@ -269,6 +437,7 @@ export default function SiteSettings() {
         }
 
         input[type="text"],
+        input[type="number"],
         textarea {
           width: 100%;
           padding: 12px 16px;
@@ -280,6 +449,7 @@ export default function SiteSettings() {
         }
 
         input[type="text"]:focus,
+        input[type="number"]:focus,
         textarea:focus {
           outline: none;
           border-color: var(--link-color);
@@ -288,6 +458,69 @@ export default function SiteSettings() {
         textarea {
           resize: vertical;
           min-height: 60px;
+        }
+
+        input[type="checkbox"] {
+          margin-right: 8px;
+        }
+
+        .image-upload-container {
+          margin-top: 8px;
+        }
+
+        .upload-area {
+          border: 2px dashed #e1e4e8;
+          border-radius: 8px;
+          padding: 20px;
+          text-align: center;
+          transition: border-color 0.2s;
+        }
+
+        .upload-area:hover {
+          border-color: var(--link-color);
+        }
+
+        .upload-area input[type="file"] {
+          display: none;
+        }
+
+        .upload-label {
+          display: inline-block;
+          padding: 10px 20px;
+          background-color: var(--link-color);
+          color: white;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: opacity 0.2s;
+        }
+
+        .upload-label:hover {
+          opacity: 0.9;
+        }
+
+        .image-preview {
+          position: relative;
+          display: inline-block;
+        }
+
+        .image-preview img {
+          max-width: 300px;
+          max-height: 200px;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .remove-image {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          background: #dc3545;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          padding: 4px 8px;
+          font-size: 12px;
+          cursor: pointer;
         }
 
         small {
@@ -361,6 +594,10 @@ export default function SiteSettings() {
 
           .form-actions {
             padding: 20px;
+          }
+
+          .image-preview img {
+            max-width: 100%;
           }
         }
       `}
