@@ -225,7 +225,7 @@ export default function SiteSettings() {
                       alt="Homepage background"
                       width={300}
                       height={200}
-                      style={{ width: '100%', height: 'auto' }}
+                      sizes="(max-width: 768px) 100vw, 300px"
                     />
                     <button
                       type="button"
@@ -305,7 +305,7 @@ export default function SiteSettings() {
                       alt="About section"
                       width={300}
                       height={200}
-                      style={{ width: '100%', height: 'auto' }}
+                      sizes="(max-width: 768px) 100vw, 300px"
                     />
                     <button
                       type="button"
@@ -503,11 +503,13 @@ export default function SiteSettings() {
           display: inline-block;
         }
 
-        .image-preview img {
+        .image-preview :global(img) {
           max-width: 300px;
           max-height: 200px;
           border-radius: 8px;
           box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          width: auto;
+          height: auto;
         }
 
         .remove-image {
@@ -596,7 +598,7 @@ export default function SiteSettings() {
             padding: 20px;
           }
 
-          .image-preview img {
+          .image-preview :global(img) {
             max-width: 100%;
           }
         }

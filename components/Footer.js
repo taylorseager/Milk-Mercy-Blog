@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import AdSense from './AdSense';
+// TODO: Uncomment when ready to add Google AdSense
+// import AdSense from './AdSense';
 
 export default function Footer() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -37,7 +38,7 @@ export default function Footer() {
 
   return (
     <>
-      {/* Bottom Ad Placement 1 - Before Footer */}
+      {/* TODO: Uncomment when ready to add Google AdSense bottom ads
       <div className="bottom-ad-container">
         <AdSense
           client="ca-pub-YOUR_ADSENSE_CLIENT_ID"
@@ -46,6 +47,7 @@ export default function Footer() {
           format="horizontal"
         />
       </div>
+      */}
 
       <footer className="footer">
         <div className="container">
@@ -59,7 +61,7 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom Ad Placement 2 - In Footer */}
+        {/* TODO: Uncomment when ready to add Google AdSense footer ad
         <div className="footer-ad-container">
           <AdSense
             client="ca-pub-YOUR_ADSENSE_CLIENT_ID"
@@ -68,9 +70,11 @@ export default function Footer() {
             format="horizontal"
           />
         </div>
+        */}
       </footer>
 
       <style jsx>{`
+        /* TODO: Uncomment when ready to add Google AdSense
         .bottom-ad-container {
           max-width: 1200px;
           margin: 40px auto 20px;
@@ -84,6 +88,7 @@ export default function Footer() {
           padding: 0 20px;
           text-align: center;
         }
+        */
 
         .footer {
           background: var(--primary-color);

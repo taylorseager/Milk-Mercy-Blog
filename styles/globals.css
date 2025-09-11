@@ -46,6 +46,7 @@ a:hover {
   flex-direction: column;
 }
 
+/* TODO: Uncomment when ready to add Google AdSense sidebar layout
 .content-wrapper {
   flex: 1;
   display: flex;
@@ -71,14 +72,17 @@ a:hover {
   padding: 10px;
   text-align: center;
 }
+*/
 
 .main-content {
   flex: 1;
-  padding: 40px 0;
-  min-width: 0;
+  padding: 40px 20px;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  width: 100%;
 }
 
-/* Ad Styles */
+/* TODO: Uncomment when ready to add Google AdSense
 .ad-container {
   margin: 10px 0;
 }
@@ -93,6 +97,7 @@ a:hover {
   max-height: 120px;
   margin: 20px auto;
 }
+*/
 
 /* Header */
 .header {
@@ -420,6 +425,7 @@ a:hover {
 
 /* Responsive */
 @media (max-width: 768px) {
+  /* TODO: Uncomment when ready to add Google AdSense sidebar
   .content-wrapper {
     flex-direction: column;
     gap: 0;
@@ -432,6 +438,7 @@ a:hover {
   .main-content {
     padding: 40px 20px;
   }
+  */
   
   .hero h1 {
     font-size: 2rem;

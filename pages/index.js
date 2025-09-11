@@ -22,8 +22,9 @@ export default function Home({ allPostsData, settings }) {
             <Image
               src={settings.heroImage}
               alt="Hero"
-              fill
-              style={{ objectFit: 'cover' }}
+              width={1200}
+              height={400}
+              style={{ objectFit: 'cover', width: '100%', height: '100%' }}
               priority
             />
           </div>
@@ -48,7 +49,6 @@ export default function Home({ allPostsData, settings }) {
                   alt="About"
                   width={300}
                   height={200}
-                  style={{ width: '100%', height: 'auto' }}
                   sizes="(max-width: 768px) 100vw, 300px"
                 />
               </div>
