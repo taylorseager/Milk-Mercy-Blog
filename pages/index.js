@@ -163,6 +163,7 @@ export async function getStaticProps() {
     heroImage: '',
     aboutImage: '',
     logoImage: '',
+    favicon: '',
     maxPostsOnHomepage: 5,
     showAboutSection: true,
   };
