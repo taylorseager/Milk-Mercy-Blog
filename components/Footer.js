@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import AdSense from './AdSense';
 
 export default function Footer() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -35,19 +36,55 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer className="footer">
-      <div className="container">
-        <div className="footer-content">
-          <p>&copy; {new Date().getFullYear()} {siteName}. {footerText}</p>
-          {isAdmin && (
-            <Link href="/admin" className="admin-link">
-              Admin
-            </Link>
-          )}
-        </div>
+    <>
+      {/* Bottom Ad Placement 1 - Before Footer */}
+      <div className="bottom-ad-container">
+        <AdSense
+          client="ca-pub-YOUR_ADSENSE_CLIENT_ID"
+          slot="YOUR_BOTTOM_AD_SLOT_1"
+          className="bottom-ad-1"
+          format="horizontal"
+        />
       </div>
 
+      <footer className="footer">
+        <div className="container">
+          <div className="footer-content">
+            <p>&copy; {new Date().getFullYear()} {siteName}. {footerText}</p>
+            {isAdmin && (
+              <Link href="/admin" className="admin-link">
+                Admin
+              </Link>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom Ad Placement 2 - In Footer */}
+        <div className="footer-ad-container">
+          <AdSense
+            client="ca-pub-YOUR_ADSENSE_CLIENT_ID"
+            slot="YOUR_BOTTOM_AD_SLOT_2"
+            className="bottom-ad-2"
+            format="horizontal"
+          />
+        </div>
+      </footer>
+
       <style jsx>{`
+        .bottom-ad-container {
+          max-width: 1200px;
+          margin: 40px auto 20px;
+          padding: 0 20px;
+          text-align: center;
+        }
+
+        .footer-ad-container {
+          max-width: 1200px;
+          margin: 20px auto 0;
+          padding: 0 20px;
+          text-align: center;
+        }
+
         .footer {
           background: var(--primary-color);
           color: white;
@@ -95,6 +132,6 @@ export default function Footer() {
         }
       `}
       </style>
-    </footer>
+    </>
   );
 }
