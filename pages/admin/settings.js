@@ -17,6 +17,7 @@ export default function SiteSettings() {
     heroImage: '',
     aboutImage: '',
     logoImage: '',
+    favicon: '',
     maxPostsOnHomepage: 5,
     showAboutSection: true,
   });
@@ -184,6 +185,85 @@ export default function SiteSettings() {
                 placeholder="A short description of your site"
               />
               <small>A brief description of your site</small>
+            </div>
+          </div>
+
+          <div className="form-section">
+            <h2>Branding</h2>
+            <div className="form-group">
+              <label htmlFor="logoImage">Site Logo</label>
+              <div className="image-upload-container">
+                {settings.logoImage ? (
+                  <div className="image-preview">
+                    <Image
+                      src={settings.logoImage}
+                      alt="Site logo"
+                      width={200}
+                      height={60}
+                      sizes="200px"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage('logoImage')}
+                      className="remove-image"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="upload-area">
+                    <input
+                      type="file"
+                      id="logoImage"
+                      accept="image/*"
+                      onChange={(e) => handleFileUpload(e, 'logoImage')}
+                      disabled={uploading === 'logoImage'}
+                    />
+                    <label htmlFor="logoImage" className="upload-label">
+                      {uploading === 'logoImage' ? 'Uploading...' : 'Choose Logo'}
+                    </label>
+                  </div>
+                )}
+              </div>
+              <small>Logo to display in the header (recommended: 200x60px or similar ratio)</small>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="favicon">Favicon</label>
+              <div className="image-upload-container">
+                {settings.favicon ? (
+                  <div className="image-preview favicon-preview">
+                    <Image
+                      src={settings.favicon}
+                      alt="Favicon"
+                      width={32}
+                      height={32}
+                      sizes="32px"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage('favicon')}
+                      className="remove-image"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="upload-area">
+                    <input
+                      type="file"
+                      id="favicon"
+                      accept="image/*,.ico"
+                      onChange={(e) => handleFileUpload(e, 'favicon')}
+                      disabled={uploading === 'favicon'}
+                    />
+                    <label htmlFor="favicon" className="upload-label">
+                      {uploading === 'favicon' ? 'Uploading...' : 'Choose Favicon'}
+                    </label>
+                  </div>
+                )}
+              </div>
+              <small>Small icon for browser tabs (recommended: 32x32px, .ico or .png format)</small>
             </div>
           </div>
 
@@ -510,6 +590,21 @@ export default function SiteSettings() {
           box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
           width: auto;
           height: auto;
+        }
+
+        .favicon-preview {
+          display: inline-block;
+          padding: 10px;
+          background: #f5f5f5;
+          border-radius: 8px;
+          border: 1px solid #ddd;
+        }
+
+        .favicon-preview :global(img) {
+          max-width: 32px;
+          max-height: 32px;
+          width: 32px;
+          height: 32px;
         }
 
         .remove-image {

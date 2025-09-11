@@ -7,7 +7,8 @@
   "footerText": "All rights reserved.",
   "heroImage": "/uploads/JoE-blog-writing-an-abstract-1755830074714.jpg",
   "aboutImage": "/uploads/ChatGPT Image Jul 25, 2025, 09_50_11 PM-1755830082085.png",
-  "logoImage": "",
+  "logoImage": "/uploads/Taylor Logo-1757597176353.svg",
   "maxPostsOnHomepage": 5,
-  "showAboutSection": true
+  "showAboutSection": true,
+  "favicon": "/uploads/Taylor Logo-1757596146115.png"
 }
