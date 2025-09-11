@@ -27,6 +27,7 @@ export default function Header() {
   return (
     <header className="header">
       <div className="container">
+        {/* eslint-disable-next-line @next/next/link-passhref */}
         <Link href="/">
           <div className="logo">
             {settings.logoImage && (
