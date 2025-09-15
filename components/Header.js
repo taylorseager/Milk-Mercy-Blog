@@ -50,6 +50,9 @@ export default function Header() {
           <Link href="/about">
             About
           </Link>
+          <Link href="/contact">
+            Contact
+          </Link>
         </nav>
       </div>
     </header>

@@ -1,0 +1,45 @@
+# reCAPTCHA Setup Instructions
+
+## Getting reCAPTCHA Keys
+
+1. Go to [Google reCAPTCHA Admin Console](https://www.google.com/recaptcha/admin/create)
+2. Click "Create" to add a new site
+3. Choose "reCAPTCHA v2" → "I'm not a robot" Checkbox
+4. Add your domain(s):
+   - For development: `localhost`
+   - For production: your actual domain (e.g., `yourblog.com`)
+5. Accept the Terms of Service
+6. Click "Submit"
+
+## Configure Environment Variables
+
+1. Copy your Site Key and Secret Key from the reCAPTCHA admin panel
+2. Open `.env.local` in your project root
+3. Replace the placeholder values:
+
+```env
+NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your_actual_site_key_here
+RECAPTCHA_SECRET_KEY=your_actual_secret_key_here
+```
+
+## Testing
+
+1. Restart your development server: `npm run dev`
+2. Navigate to a blog post
+3. Try to submit a comment - you should see the reCAPTCHA checkbox
+4. Comments will be blocked until the reCAPTCHA is completed
+
+## Security Features Added
+
+- Enhanced email validation (blocks obvious fake patterns like "1234@gmail.com")
+- reCAPTCHA verification required for all comments
+- Content spam detection with keyword filtering
+- Rate limiting (5-minute cooldown between comments from same email)
+- Link count limiting (max 2 links per comment)
+- Disposable email domain blocking
+
+## Troubleshooting
+
+- If reCAPTCHA doesn't appear, check that `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` is set correctly
+- If verification fails, check that `RECAPTCHA_SECRET_KEY` is set correctly
+- Make sure to add your actual domain to the reCAPTCHA settings in production
