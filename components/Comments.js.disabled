@@ -1,0 +1,647 @@
+/* eslint-disable react/prop-types */
+import { useState, useEffect, useRef } from 'react';
+import ReCAPTCHA from 'react-google-recaptcha';
+
+const HeartIcon = ({ filled, onClick }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="heart-button"
+    aria-label={filled ? 'Unlike comment' : 'Like comment'}
+  >
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill={filled ? '#32CD32' : 'none'}
+      stroke={filled ? '#32CD32' : 'currentColor'}
+      strokeWidth="2"
+    >
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+    </svg>
+  </button>
+);
+
+const CommentForm = ({ onSubmit, parentId = null, onCancel = null }) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [content, setContent] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const recaptchaRef = useRef(null);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setIsSubmitting(true);
+
+    try {
+      // Get reCAPTCHA token if configured
+      let recaptchaToken = null;
+      if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+        recaptchaToken = recaptchaRef.current?.getValue();
+        if (!recaptchaToken) {
+          throw new Error('Please complete the reCAPTCHA verification');
+        }
+      }
+
+      await onSubmit({
+        name, email, content, parentId, recaptchaToken,
+      });
+      setName('');
+      setEmail('');
+      setContent('');
+      recaptchaRef.current?.reset();
+      if (onCancel) onCancel();
+    } catch (err) {
+      setError(err.message || 'Failed to submit comment');
+      recaptchaRef.current?.reset();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="comment-form">
+      <div className="form-row">
+        <div className="form-group">
+          <input
+            type="text"
+            placeholder="Your Name *"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            maxLength={50}
+          />
+        </div>
+        <div className="form-group">
+          <input
+            type="email"
+            placeholder="Your Email *"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+      </div>
+      <div className="form-group">
+        <textarea
+          placeholder="Write your comment... *"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          required
+          maxLength={1000}
+          rows={4}
+        />
+        <div className="char-count">
+          {content.length}/1000
+        </div>
+      </div>
+
+      <div className="recaptcha-container">
+        {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ? (
+          <ReCAPTCHA
+            ref={recaptchaRef}
+            sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+            theme="light"
+          />
+        ) : (
+          <div className="recaptcha-warning">
+            ⚠️ reCAPTCHA not configured. Please set NEXT_PUBLIC_RECAPTCHA_SITE_KEY in .env.local
+          </div>
+        )}
+      </div>
+
+      {error && <div className="error-message">{error}</div>}
+      <div className="form-actions">
+        <button type="submit" disabled={isSubmitting} className="submit-btn">
+          {(() => {
+            if (isSubmitting) return 'Posting...';
+            if (parentId) return 'Post Reply';
+            return 'Post Comment';
+          })()}
+        </button>
+        {onCancel && (
+          <button type="button" onClick={onCancel} className="cancel-btn">
+            Cancel
+          </button>
+        )}
+      </div>
+    </form>
+  );
+};
+
+const Comment = ({
+  comment, onLike, onReply, userId, level = 0,
+}) => {
+  const [showReplyForm, setShowReplyForm] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+
+  useEffect(() => {
+    const likes = comment.likes || [];
+    setLikeCount(likes.length);
+    setIsLiked(likes.includes(userId || 'anonymous'));
+  }, [comment.likes, userId]);
+
+  const handleLike = async () => {
+    try {
+      await onLike(comment.id);
+      setIsLiked(!isLiked);
+      setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
+    } catch (error) {
+      console.error('Failed to like comment:', error);
+    }
+  };
+
+  const handleReply = async (replyData) => {
+    await onReply({ ...replyData, parentId: comment.id });
+    setShowReplyForm(false);
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  return (
+    <div className={`comment ${level > 0 ? 'comment-reply' : ''}`}>
+      <div className="comment-header">
+        <div className="comment-author">
+          <strong>{comment.name}</strong>
+        </div>
+        <div className="comment-date">
+          {formatDate(comment.createdAt)}
+        </div>
+      </div>
+
+      <div className="comment-content">
+        {comment.content}
+      </div>
+
+      <div className="comment-actions">
+        <div className="like-section">
+          <HeartIcon filled={isLiked} onClick={handleLike} />
+          {likeCount > 0 && <span className="like-count">{likeCount}</span>}
+        </div>
+
+        {level < 3 && (
+          <button
+            type="button"
+            onClick={() => setShowReplyForm(!showReplyForm)}
+            className="reply-btn"
+          >
+            Reply
+          </button>
+        )}
+      </div>
+
+      {showReplyForm && (
+        <div className="reply-form-container">
+          <CommentForm
+            onSubmit={handleReply}
+            parentId={comment.id}
+            onCancel={() => setShowReplyForm(false)}
+          />
+        </div>
+      )}
+
+      {comment.replies && comment.replies.length > 0 && (
+        <div className="replies">
+          {comment.replies.map((reply) => (
+            <Comment
+              key={reply.id}
+              comment={reply}
+              onLike={onLike}
+              onReply={onReply}
+              userId={userId}
+              level={level + 1}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default function Comments({ slug }) {
+  const [comments, setComments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [userId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      let id = localStorage.getItem('commentUserId');
+      if (!id) {
+        id = `user_${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem('commentUserId', id);
+      }
+      return id;
+    }
+    return 'anonymous';
+  });
+
+  const fetchComments = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/comments?slug=${slug}`);
+      const data = await response.json();
+      if (response.ok) {
+        setComments(data.comments || []);
+      } else {
+        setError(data.error || 'Failed to load comments');
+      }
+    } catch (err) {
+      setError('Failed to load comments');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (slug) {
+      fetchComments();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug]);
+
+  const handleSubmitComment = async (commentData) => {
+    const response = await fetch('/api/comments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slug, ...commentData }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to post comment');
+    }
+
+    fetchComments(); // Refresh comments
+  };
+
+  const handleLike = async (commentId) => {
+    const response = await fetch('/api/comments', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        slug,
+        commentId,
+        action: 'like',
+        userId,
+      }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error || 'Failed to like comment');
+    }
+
+    fetchComments(); // Refresh comments to get updated like counts
+  };
+
+  if (loading) {
+    return (
+      <div className="comments-section">
+        <div className="loading">Loading comments...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="comments-section">
+      <h3 className="comments-title">
+        Comments ({comments.length})
+      </h3>
+
+      <div className="new-comment">
+        <h4>Leave a Comment</h4>
+        <CommentForm onSubmit={handleSubmitComment} />
+      </div>
+
+      {error && <div className="error-message">{error}</div>}
+
+      <div className="comments-list">
+        {comments.length === 0 ? (
+          <div className="no-comments">
+            Be the first to leave a comment!
+          </div>
+        ) : (
+          comments.map((comment) => (
+            <Comment
+              key={comment.id}
+              comment={comment}
+              onLike={handleLike}
+              onReply={handleSubmitComment}
+              userId={userId}
+            />
+          ))
+        )}
+      </div>
+
+      <style jsx>{`
+        .comments-section {
+          margin-top: 60px;
+          padding-top: 40px;
+          border-top: 2px solid var(--border-color);
+        }
+
+        .comments-title {
+          color: var(--primary-color);
+          margin-bottom: 30px;
+          font-size: 1.8rem;
+        }
+
+        .new-comment {
+          margin-bottom: 50px;
+          padding: 30px;
+          background: var(--background-alt);
+          border-radius: 12px;
+          border: 1px solid var(--border-color);
+        }
+
+        .new-comment h4 {
+          color: var(--primary-color);
+          margin-bottom: 20px;
+          font-size: 1.2rem;
+        }
+
+        .loading {
+          text-align: center;
+          padding: 40px;
+          color: var(--text-light);
+        }
+
+        .error-message {
+          background: #fee;
+          color: #d32f2f;
+          padding: 12px 16px;
+          border-radius: 6px;
+          margin-bottom: 20px;
+          font-size: 14px;
+        }
+
+        .no-comments {
+          text-align: center;
+          color: var(--text-light);
+          font-style: italic;
+          padding: 60px 20px;
+          background: var(--background-alt);
+          border-radius: 12px;
+          font-size: 1.1rem;
+        }
+
+        .comments-list {
+          margin-top: 40px;
+        }
+
+        /* Comment Form Styles */
+        :global(.comment-form) {
+          background: white;
+          padding: 25px;
+          border-radius: 10px;
+          border: 1px solid var(--border-color);
+        }
+
+        :global(.form-row) {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 15px;
+          margin-bottom: 15px;
+        }
+
+        :global(.form-group) {
+          position: relative;
+        }
+
+        :global(.form-group input),
+        :global(.form-group textarea) {
+          width: 100%;
+          padding: 12px 16px;
+          font-size: 16px;
+          font-family: inherit;
+          border: 2px solid var(--border-color);
+          border-radius: 6px;
+          transition: border-color 0.2s;
+          box-sizing: border-box;
+        }
+
+        :global(.form-group input:focus),
+        :global(.form-group textarea:focus) {
+          outline: none;
+          border-color: var(--link-color);
+        }
+
+        :global(.char-count) {
+          text-align: right;
+          font-size: 12px;
+          color: var(--text-light);
+          margin-top: 5px;
+        }
+
+        :global(.recaptcha-container) {
+          margin: 20px 0;
+          display: flex;
+          justify-content: center;
+        }
+
+        :global(.recaptcha-warning) {
+          background: #fff3cd;
+          color: #856404;
+          padding: 12px 16px;
+          border: 1px solid #ffeaa7;
+          border-radius: 6px;
+          font-size: 14px;
+          text-align: center;
+        }
+
+        :global(.form-actions) {
+          display: flex;
+          gap: 10px;
+          margin-top: 20px;
+        }
+
+        :global(.submit-btn) {
+          background-color: var(--primary-color);
+          color: white;
+          border: none;
+          padding: 12px 24px;
+          font-size: 14px;
+          font-weight: 600;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+
+        :global(.submit-btn:hover:not(:disabled)) {
+          opacity: 0.9;
+        }
+
+        :global(.submit-btn:disabled) {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        :global(.cancel-btn) {
+          background: none;
+          color: var(--text-light);
+          border: 1px solid var(--border-color);
+          padding: 12px 24px;
+          font-size: 14px;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        :global(.cancel-btn:hover) {
+          background: var(--background-alt);
+          color: var(--text-color);
+        }
+
+        /* Individual Comment Styles */
+        :global(.comment) {
+          background: white;
+          padding: 25px;
+          border-radius: 12px;
+          border: 1px solid var(--border-color);
+          margin-bottom: 20px;
+          transition: box-shadow 0.2s;
+        }
+
+        :global(.comment:hover) {
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        :global(.comment-reply) {
+          margin-left: 30px;
+          margin-top: 15px;
+          border-left: 3px solid var(--link-color);
+        }
+
+        :global(.comment-header) {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 15px;
+          padding-bottom: 10px;
+          border-bottom: 1px solid var(--border-color);
+        }
+
+        :global(.comment-author strong) {
+          color: var(--primary-color);
+          font-size: 14px;
+        }
+
+        :global(.comment-date) {
+          font-size: 12px;
+          color: var(--text-light);
+        }
+
+        :global(.comment-content) {
+          line-height: 1.7;
+          color: var(--text-color);
+          margin-bottom: 15px;
+          white-space: pre-wrap;
+        }
+
+        :global(.comment-actions) {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+        }
+
+        :global(.like-section) {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+
+        :global(.heart-button) {
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 4px;
+          border-radius: 4px;
+          transition: background-color 0.2s;
+        }
+
+        :global(.heart-button:hover) {
+          background: var(--background-alt);
+        }
+
+        :global(.like-count) {
+          font-size: 12px;
+          color: var(--text-light);
+        }
+
+        :global(.reply-btn) {
+          background: none;
+          border: none;
+          color: var(--link-color);
+          cursor: pointer;
+          font-size: 13px;
+          font-weight: 500;
+          padding: 4px 8px;
+          border-radius: 4px;
+          transition: background-color 0.2s;
+        }
+
+        :global(.reply-btn:hover) {
+          background: var(--background-alt);
+        }
+
+        :global(.reply-form-container) {
+          margin-top: 15px;
+          padding-top: 15px;
+          border-top: 1px solid var(--border-color);
+        }
+
+        :global(.replies) {
+          margin-top: 15px;
+        }
+
+        @media (max-width: 768px) {
+          .comments-section {
+            margin-top: 40px;
+            padding-top: 30px;
+          }
+
+          .new-comment {
+            padding: 20px;
+            margin-bottom: 30px;
+          }
+
+          :global(.form-row) {
+            grid-template-columns: 1fr;
+            gap: 10px;
+          }
+
+          :global(.comment-reply) {
+            margin-left: 15px;
+          }
+
+          :global(.comment-header) {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+          }
+
+          :global(.form-actions) {
+            flex-direction: column;
+          }
+
+          :global(.submit-btn),
+          :global(.cancel-btn) {
+            width: 100%;
+          }
+        }
+      `}
+      </style>
+    </div>
+  );
+}

@@ -1,0 +1,47 @@
+{
+  "comments": [
+    {
+      "id": "mfl4b7rkyz2dgsvamo",
+      "name": "Taylor",
+      "email": "1234@yahoo.com",
+      "content": "Test Test Test",
+      "parentId": null,
+      "createdAt": "2025-09-15T12:46:16.592Z",
+      "likes": [
+        "user_da2i88ctx"
+      ],
+      "replies": [
+        {
+          "id": "mfl4cfc9la7ku36upwn",
+          "name": "Kevin",
+          "email": "kevin@hca.com",
+          "content": "Test 1234 12345 :)",
+          "parentId": "mfl4b7rkyz2dgsvamo",
+          "createdAt": "2025-09-15T12:47:13.065Z",
+          "likes": [],
+          "replies": []
+        }
+      ]
+    },
+    {
+      "id": "mfl4ok7lgftnpg2r7uf",
+      "name": "Taylor",
+      "email": "1234@gmail.com",
+      "content": "Further auth test",
+      "parentId": null,
+      "createdAt": "2025-09-15T12:56:39.249Z",
+      "likes": [],
+      "replies": []
+    },
+    {
+      "id": "mfl4oy1puyeest5qef",
+      "name": "Tater",
+      "email": "taylorseager718@gmail.com",
+      "content": "atdfadf",
+      "parentId": null,
+      "createdAt": "2025-09-15T12:56:57.181Z",
+      "likes": [],
+      "replies": []
+    }
+  ]
+}

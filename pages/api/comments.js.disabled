@@ -1,0 +1,258 @@
+import fs from 'fs';
+import path from 'path';
+
+const commentsDirectory = path.join(process.cwd(), 'data', 'comments');
+
+// Ensure comments directory exists
+if (!fs.existsSync(commentsDirectory)) {
+  fs.mkdirSync(commentsDirectory, { recursive: true });
+}
+
+// Generate unique ID
+const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
+
+export default async function handler(req, res) {
+  const { method } = req;
+
+  try {
+    switch (method) {
+      case 'GET': {
+        const { slug } = req.query;
+
+        if (!slug) {
+          return res.status(400).json({ error: 'Post slug is required' });
+        }
+
+        const commentsFile = path.join(commentsDirectory, `${slug}.json`);
+        if (!fs.existsSync(commentsFile)) {
+          return res.status(200).json({ comments: [] });
+        }
+
+        const commentsData = JSON.parse(fs.readFileSync(commentsFile, 'utf8'));
+        const comments = commentsData.comments || [];
+
+        // Sort comments by date, newest first
+        comments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        return res.status(200).json({ comments });
+      }
+
+      case 'POST': {
+        const {
+          slug, name, email, content, parentId = null, recaptchaToken,
+        } = req.body;
+
+        if (!slug || !name || !email || !content) {
+          return res.status(400).json({ error: 'Name, email, and comment are required' });
+        }
+
+        // Verify reCAPTCHA if configured
+        if (process.env.RECAPTCHA_SECRET_KEY) {
+          if (!recaptchaToken) {
+            return res.status(400).json({ error: 'Please complete the reCAPTCHA verification' });
+          }
+
+          const recaptchaResponse = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${recaptchaToken}`,
+          });
+
+          const recaptchaData = await recaptchaResponse.json();
+          if (!recaptchaData.success) {
+            return res.status(400).json({ error: 'reCAPTCHA verification failed. Please try again.' });
+          }
+        }
+
+        // Enhanced email validation and spam protection
+        const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+        if (!emailRegex.test(email)) {
+          return res.status(400).json({ error: 'Please enter a valid email address' });
+        }
+
+        // Block common spam email patterns
+        const spamEmailPatterns = [
+          /\+.*@/, // Plus addressing (e.g., user+spam@domain.com)
+          /^\d+@/, // Email starting with only numbers (like 1234@gmail.com)
+          /^\d{4,}@/, // Email starting with 4+ numbers
+          /@(10minutemail|guerrillamail|mailinator|tempmail|throwaway)/i,
+          /@.*\.(tk|ml|ga|cf)$/i, // Common free spam domains
+          /^[a-z]{1,3}@/, // Very short usernames (often fake)
+          /^test@|^fake@|^spam@/i, // Obviously fake emails
+        ];
+
+        if (spamEmailPatterns.some((pattern) => pattern.test(email))) {
+          return res.status(400).json({ error: 'Please use a valid personal email address' });
+        }
+
+        // Block disposable email domains (common ones)
+        const disposableDomains = [
+          '10minutemail.com', 'guerrillamail.com', 'mailinator.com',
+          'tempmail.org', 'throwawaymail.com', 'getnada.com',
+          'temp-mail.org', 'yopmail.com', 'maildrop.cc',
+        ];
+        const emailDomain = email.split('@')[1]?.toLowerCase();
+        if (disposableDomains.includes(emailDomain)) {
+          return res.status(400).json({ error: 'Temporary email addresses are not allowed' });
+        }
+
+        if (content.trim().length < 1) {
+          return res.status(400).json({ error: 'Comment cannot be empty' });
+        }
+
+        if (content.length > 1000) {
+          return res.status(400).json({ error: 'Comment too long (max 1000 characters)' });
+        }
+
+        // Content spam detection
+        const spamKeywords = [
+          'buy now', 'click here', 'make money', 'free money', 'viagra',
+          'casino', 'lottery', 'winner', 'congratulations', 'urgent',
+          'limited time', 'act now', 'guaranteed', 'risk free',
+          'no obligation', 'call now', 'credit card', 'loan',
+        ];
+
+        const contentLower = content.toLowerCase();
+        const spamScore = spamKeywords.reduce((score, keyword) => score + (contentLower.includes(keyword) ? 1 : 0), 0);
+
+        if (spamScore >= 3) {
+          return res.status(400).json({ error: 'Comment contains inappropriate content' });
+        }
+
+        // Check for excessive links (spam indicator)
+        const linkCount = (content.match(/https?:\/\//g) || []).length;
+        if (linkCount > 2) {
+          return res.status(400).json({ error: 'Comments with multiple links are not allowed' });
+        }
+
+        // Check for repeated characters (spam pattern)
+        if (/(.)\1{10,}/.test(content)) {
+          return res.status(400).json({ error: 'Please avoid excessive repeated characters' });
+        }
+
+        // Simple rate limiting - check if same email posted recently
+        const commentsFile = path.join(commentsDirectory, `${slug}.json`);
+        let commentsData = { comments: [] };
+        if (fs.existsSync(commentsFile)) {
+          commentsData = JSON.parse(fs.readFileSync(commentsFile, 'utf8'));
+
+          // Check for recent comments from same email (within 5 minutes)
+          const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+          const recentComments = commentsData.comments?.filter((comment) => {
+            const commentTime = new Date(comment.createdAt);
+            return comment.email === email.toLowerCase() && commentTime > fiveMinutesAgo;
+          }) || [];
+
+          if (recentComments.length > 0) {
+            return res.status(429).json({ error: 'Please wait 5 minutes before posting another comment' });
+          }
+        }
+
+        const newComment = {
+          id: generateId(),
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          content: content.trim(),
+          parentId,
+          createdAt: new Date().toISOString(),
+          likes: [],
+          replies: [],
+        };
+
+        commentsData.comments = commentsData.comments || [];
+
+        if (parentId) {
+          // Find parent comment and add as reply
+          const findAndAddReply = (commentsList) => {
+            const foundComment = commentsList.find((comment) => {
+              if (comment.id === parentId) {
+                // eslint-disable-next-line no-param-reassign
+                if (!comment.replies) comment.replies = [];
+                comment.replies.push(newComment);
+                return true;
+              }
+              if (comment.replies && findAndAddReply(comment.replies)) {
+                return true;
+              }
+              return false;
+            });
+            return !!foundComment;
+          };
+
+          if (!findAndAddReply(commentsData.comments)) {
+            return res.status(404).json({ error: 'Parent comment not found' });
+          }
+        } else {
+          // Add as top-level comment
+          commentsData.comments.push(newComment);
+        }
+
+        fs.writeFileSync(commentsFile, JSON.stringify(commentsData, null, 2));
+        return res.status(201).json({ comment: newComment, message: 'Comment added successfully' });
+      }
+
+      case 'PATCH': {
+        const {
+          slug, commentId, action, userId,
+        } = req.body;
+
+        if (!slug || !commentId || !action) {
+          return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        const commentsFile = path.join(commentsDirectory, `${slug}.json`);
+        if (!fs.existsSync(commentsFile)) {
+          return res.status(404).json({ error: 'No comments found for this post' });
+        }
+
+        const commentsData = JSON.parse(fs.readFileSync(commentsFile, 'utf8'));
+        let updated = false;
+
+        const updateComment = (commentsList) => {
+          const targetComment = commentsList.find((comment) => {
+            if (comment.id === commentId) {
+              if (action === 'like') {
+                const userIdToUse = userId || 'anonymous';
+                // eslint-disable-next-line no-param-reassign
+                if (!comment.likes) comment.likes = [];
+
+                const likeIndex = comment.likes.indexOf(userIdToUse);
+                if (likeIndex > -1) {
+                  // Unlike
+                  comment.likes.splice(likeIndex, 1);
+                } else {
+                  // Like
+                  comment.likes.push(userIdToUse);
+                }
+                updated = true;
+                return comment;
+              }
+            }
+            if (comment.replies && comment.replies.length > 0) {
+              const result = updateComment(comment.replies);
+              if (result) return result;
+            }
+            return false;
+          });
+          return targetComment || null;
+        };
+
+        const updatedComment = updateComment(commentsData.comments);
+
+        if (!updated) {
+          return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        fs.writeFileSync(commentsFile, JSON.stringify(commentsData, null, 2));
+        return res.status(200).json(updatedComment);
+      }
+
+      default:
+        res.setHeader('Allow', ['GET', 'POST', 'PATCH']);
+        return res.status(405).json({ error: `Method ${method} not allowed` });
+    }
+  } catch (error) {
+    console.error('API Error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}

@@ -93,6 +93,15 @@ export default function AdminLogin() {
                   </div>
                 </Link>
               </div>
+
+              <div className="action-card-wrapper">
+                <Link href="/admin/contact" passHref>
+                  <div>
+                    <h3>Contact Submissions</h3>
+                    <p>View and manage contact form messages</p>
+                  </div>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
