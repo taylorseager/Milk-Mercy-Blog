@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { IncomingForm } from 'formidable';
+import { put } from '@vercel/blob';
 
 export const config = {
   api: {
@@ -15,15 +16,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-
-    // Ensure upload directory exists
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
     const form = new IncomingForm({
-      uploadDir,
       keepExtensions: true,
       maxFileSize: 10 * 1024 * 1024, // 10MB limit
     });
@@ -45,7 +38,6 @@ export default async function handler(req, res) {
     const extension = path.extname(originalName);
     const basename = path.basename(originalName, extension);
     const newFilename = `${basename}-${timestamp}${extension}`;
-    const newPath = path.join(uploadDir, newFilename);
 
     // Get the temporary file path (formidable v3 uses different property names)
     const tempPath = file.filepath || file.path;
@@ -54,16 +46,22 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Invalid file upload' });
     }
 
-    // Move file to final location
-    fs.renameSync(tempPath, newPath);
+    // Read file from temporary location
+    const fileBuffer = fs.readFileSync(tempPath);
 
-    // Return the public URL
-    const publicUrl = `/uploads/${newFilename}`;
+    // Upload to Vercel Blob
+    const blob = await put(newFilename, fileBuffer, {
+      access: 'public',
+      addRandomSuffix: false,
+    });
+
+    // Clean up temporary file
+    fs.unlinkSync(tempPath);
 
     return res.status(200).json({
       success: true,
       filename: newFilename,
-      url: publicUrl,
+      url: blob.url,
     });
   } catch (error) {
     console.error('Upload error:', error);
