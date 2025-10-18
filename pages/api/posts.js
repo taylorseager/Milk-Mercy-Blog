@@ -1,6 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb',
+    },
+  },
+};
+
 export default function handler(req, res) {
   if (req.method === 'GET') {
     try {

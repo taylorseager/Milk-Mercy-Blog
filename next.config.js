@@ -4,7 +4,14 @@ module.exports = {
     ignoreDuringBuilds: true,
   },
   images: {
+    domains: [
+      'ohwbmhtqofrnk7be.public.blob.vercel-storage.com',
+    ],
     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.public.blob.vercel-storage.com',
+      },
       {
         protocol: 'https',
         hostname: '**',

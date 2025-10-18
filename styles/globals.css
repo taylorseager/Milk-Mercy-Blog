@@ -127,6 +127,17 @@ a:hover {
   opacity: 0.8;
 }
 
+.logo-image {
+  max-width: 200px;
+  height: auto;
+}
+
+.hero-image-fill {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
 .site-title {
   font-size: 1.5rem;
   font-weight: bold;
