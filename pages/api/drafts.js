@@ -8,6 +8,14 @@ if (!fs.existsSync(draftsDirectory)) {
   fs.mkdirSync(draftsDirectory, { recursive: true });
 }
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb',
+    },
+  },
+};
+
 export default function handler(req, res) {
   if (req.method === 'GET') {
     try {

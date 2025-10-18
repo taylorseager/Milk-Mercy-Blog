@@ -36,7 +36,7 @@ export default function Header() {
                 alt={settings.siteName}
                 width={65}
                 height={60}
-                style={{ maxWidth: '200px', height: 'auto' }}
+                className="logo-image"
                 priority
               />
             )}

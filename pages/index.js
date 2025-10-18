@@ -24,7 +24,7 @@ export default function Home({ allPostsData, settings }) {
               alt="Hero"
               width={1200}
               height={400}
-              style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+              className="hero-image-fill"
               priority
             />
           </div>
