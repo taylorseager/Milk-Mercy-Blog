@@ -40,7 +40,7 @@ export default function Header() {
                 priority
               />
             )}
-            <span className="site-title">Milk & Honey</span>
+            <span className="site-title">{settings.siteName}</span>
           </div>
         </Link>
         <nav className="nav">

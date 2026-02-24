@@ -1,10 +1,9 @@
+import { put, list, del } from '@vercel/blob';
 import fs from 'fs';
 import path from 'path';
 
-const settingsFile = path.join(process.cwd(), 'data', 'settings.json');
-const dataDir = path.join(process.cwd(), 'data');
+const SETTINGS_BLOB_PATHNAME = 'settings/settings.json';
 
-// Default settings
 const defaultSettings = {
   siteName: 'Milk & Mercy',
   tagline: 'Welcome to our blog',
@@ -14,20 +13,39 @@ const defaultSettings = {
   footerText: 'All rights reserved.',
 };
 
-// Ensure data directory exists
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
+async function getSettingsFromBlob() {
+  try {
+    const { blobs } = await list({ prefix: 'settings/' });
+    const settingsBlob = blobs.find((b) => b.pathname === SETTINGS_BLOB_PATHNAME);
+    if (!settingsBlob) return null;
+
+    const response = await fetch(settingsBlob.url);
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
 }
 
-// Initialize settings file with defaults if it doesn't exist
-if (!fs.existsSync(settingsFile)) {
-  fs.writeFileSync(settingsFile, JSON.stringify(defaultSettings, null, 2));
+function getSettingsFromFilesystem() {
+  try {
+    const settingsFile = path.join(process.cwd(), 'data', 'settings.json');
+    if (fs.existsSync(settingsFile)) {
+      return JSON.parse(fs.readFileSync(settingsFile, 'utf8'));
+    }
+  } catch {
+    // ignore
+  }
+  return null;
 }
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
-      const settings = JSON.parse(fs.readFileSync(settingsFile, 'utf8'));
+      // Try Vercel Blob first, fall back to filesystem (covers initial migration)
+      const settings = (await getSettingsFromBlob())
+        || getSettingsFromFilesystem()
+        || defaultSettings;
       return res.status(200).json(settings);
     } catch (error) {
       console.error('Error reading settings:', error);
@@ -36,16 +54,29 @@ export default function handler(req, res) {
   } else if (req.method === 'POST') {
     try {
       const updatedSettings = req.body;
-      // Validate that we have the required fields
       if (!updatedSettings.siteName) {
         return res.status(400).json({ error: 'Site name is required' });
       }
 
-      // Merge with existing settings to preserve any fields not being updated
-      const currentSettings = JSON.parse(fs.readFileSync(settingsFile, 'utf8'));
+      // Get current settings to merge
+      const currentSettings = (await getSettingsFromBlob())
+        || getSettingsFromFilesystem()
+        || defaultSettings;
       const newSettings = { ...currentSettings, ...updatedSettings };
 
-      fs.writeFileSync(settingsFile, JSON.stringify(newSettings, null, 2));
+      // Delete existing settings blob before writing new one
+      const { blobs } = await list({ prefix: 'settings/' });
+      const existingBlob = blobs.find((b) => b.pathname === SETTINGS_BLOB_PATHNAME);
+      if (existingBlob) {
+        await del(existingBlob.url);
+      }
+
+      // Save updated settings to Vercel Blob
+      await put(SETTINGS_BLOB_PATHNAME, JSON.stringify(newSettings, null, 2), {
+        access: 'public',
+        addRandomSuffix: false,
+      });
+
       return res.status(200).json({
         message: 'Settings updated successfully',
         settings: newSettings,

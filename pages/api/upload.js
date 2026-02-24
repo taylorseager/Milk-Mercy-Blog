@@ -4,7 +4,9 @@ import Busboy from 'busboy';
 export const config = {
   api: {
     bodyParser: false,
+    responseLimit: false,
   },
+  maxDuration: 60, // Allow up to 60 seconds for upload
 };
 
 export default async function handler(req, res) {
@@ -26,8 +28,14 @@ export default async function handler(req, res) {
 
   try {
     const { fileBuffer, filename } = await new Promise((resolve, reject) => {
-      const busboy = Busboy({ headers: req.headers });
+      const busboy = Busboy({
+        headers: req.headers,
+        limits: {
+          fileSize: 10 * 1024 * 1024, // 10MB limit
+        },
+      });
       let uploadedFile = null;
+      let hasError = false;
 
       busboy.on('file', (fieldname, file, info) => {
         const { filename: originalFilename } = info;
@@ -37,15 +45,30 @@ export default async function handler(req, res) {
           chunks.push(data);
         });
 
+        file.on('limit', () => {
+          hasError = true;
+          reject(new Error('File size exceeds 10MB limit'));
+        });
+
         file.on('end', () => {
-          uploadedFile = {
-            fileBuffer: Buffer.concat(chunks),
-            filename: originalFilename,
-          };
+          if (!hasError) {
+            uploadedFile = {
+              fileBuffer: Buffer.concat(chunks),
+              filename: originalFilename,
+            };
+          }
+        });
+
+        file.on('error', (err) => {
+          hasError = true;
+          reject(err);
         });
       });
 
       busboy.on('finish', () => {
+        if (hasError) {
+          return;
+        }
         if (!uploadedFile) {
           reject(new Error('No file uploaded'));
         } else {
@@ -59,11 +82,6 @@ export default async function handler(req, res) {
 
       req.pipe(busboy);
     });
-
-    // Validate file size (10MB max)
-    if (fileBuffer.length > 10 * 1024 * 1024) {
-      return res.status(400).json({ error: 'File size exceeds 10MB limit' });
-    }
 
     // Generate unique filename
     const timestamp = Date.now();
@@ -83,7 +101,6 @@ export default async function handler(req, res) {
       url: blob.url,
     });
   } catch (error) {
-    console.error('Upload error:', error);
     return res.status(500).json({
       error: 'Failed to upload file',
       details: error.message,
