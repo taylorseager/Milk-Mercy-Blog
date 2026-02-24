@@ -26,8 +26,6 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
   }
 
-  console.log('Upload started - Content-Type:', req.headers['content-type']);
-
   try {
     const { fileBuffer, filename } = await new Promise((resolve, reject) => {
       const busboy = Busboy({
@@ -40,7 +38,6 @@ export default async function handler(req, res) {
       let hasError = false;
 
       busboy.on('file', (fieldname, file, info) => {
-        console.log('File detected:', info.filename);
         const { filename: originalFilename } = info;
         const chunks = [];
 
@@ -59,7 +56,6 @@ export default async function handler(req, res) {
               fileBuffer: Buffer.concat(chunks),
               filename: originalFilename,
             };
-            console.log('File buffered:', originalFilename, 'Size:', uploadedFile.fileBuffer.length);
           }
         });
 
@@ -76,20 +72,16 @@ export default async function handler(req, res) {
         if (!uploadedFile) {
           reject(new Error('No file uploaded'));
         } else {
-          console.log('Busboy finished processing');
           resolve(uploadedFile);
         }
       });
 
       busboy.on('error', (error) => {
-        console.error('Busboy error:', error);
         reject(error);
       });
 
       req.pipe(busboy);
     });
-
-    console.log('File parsed successfully, uploading to Vercel Blob...');
 
     // Generate unique filename
     const timestamp = Date.now();
@@ -103,15 +95,12 @@ export default async function handler(req, res) {
       addRandomSuffix: false,
     });
 
-    console.log('Upload successful:', blob.url);
-
     return res.status(200).json({
       success: true,
       filename: newFilename,
       url: blob.url,
     });
   } catch (error) {
-    console.error('Upload error:', error.message, error.stack);
     return res.status(500).json({
       error: 'Failed to upload file',
       details: error.message,
