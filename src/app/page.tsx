@@ -16,34 +16,27 @@ export default function HomePage() {
             <p>Hello, and welcome!</p>
             <p>
               I&apos;m so glad you found your way here. <em>Milk &amp; Mercy</em> is a little
-              corner of the internet I&apos;m building as a place to slow down — to notice the
-              things that often go unnoticed, and to find grace woven through the fabric of
-              everyday life.
+              corner of the internet I&apos;m building as a place to share things about my journey into motherhood, and how God is shaping and forming me as I grow in my Christlikeness. Just a space to be real about all things life.
             </p>
             <h2>Why &ldquo;Milk &amp; Mercy&rdquo;?</h2>
             <p>
-              Milk: nourishing, simple, honest. The kind of comfort that doesn&apos;t need to
-              be dressed up.
+              <strong><u>Milk</u></strong>: nourishing, simple, honest. Specifically, in regards to 1 Peter 2:2.
             </p>
             <p>
-              Mercy: undeserved, gentle, and always available — even on the hardest days.
+              <strong><u>Mercy</u></strong>: undeserved, gentle, and always available — even on the hardest days.
             </p>
             <p>
-              Together, they represent what I hope this space becomes for you: something that
-              feeds your soul and reminds you that grace is closer than you think.
+              Together, they represent what I hope this space becomes for you (and for me): something that
+              feeds your soul, and reminds you that grace is closer than you think.
             </p>
-            <h2>What to Expect</h2>
+            {/* <h2>What to Expect</h2>
             <p>This blog is a space for:</p>
             <ul>
               <li><strong>Stories</strong> — small moments that carry big weight</li>
               <li><strong>Reflections</strong> — honest thoughts on faith, life, and the everyday</li>
               <li><strong>Rest</strong> — permission to exhale, to be still, to just <em>be</em></li>
-            </ul>
-            <p>
-              There is no hustle here. No five-step plan or perfectly curated life. Just words,
-              offered with care, for whoever needs them today.
-            </p>
-            <p>I&apos;m so glad you&apos;re here. Pull up a chair.</p>
+            </ul> */}
+            <p>I&apos;m so glad you&apos;re here. Pull up a chair and get cozy.</p>
           </div>
         </div>
       </section>
