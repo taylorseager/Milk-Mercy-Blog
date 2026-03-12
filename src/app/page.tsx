@@ -1,4 +1,5 @@
 import BlogCard from '@/components/BlogCard';
+import NewsletterSignup from '@/components/NewsletterSignup';
 import { getRecentPosts } from '@/lib/posts';
 
 export default function HomePage() {
@@ -65,6 +66,8 @@ export default function HomePage() {
           </div>
         )}
       </section>
+
+      <NewsletterSignup />
     </>
   );
 }
