@@ -28,11 +28,11 @@ export default function NewsletterSignup() {
       url.replace('/post?', '/post-json?') +
       `&EMAIL=${encodeURIComponent(email)}&${honeypot}=&c=${callbackName}`;
 
-    (window as Record<string, unknown>)[callbackName] = (data: {
+    (window as unknown as Record<string, unknown>)[callbackName] = (data: {
       result: string;
       msg: string;
     }) => {
-      delete (window as Record<string, unknown>)[callbackName];
+      delete (window as unknown as Record<string, unknown>)[callbackName];
       document.getElementById(callbackName)?.remove();
 
       if (data.result === 'success') {
