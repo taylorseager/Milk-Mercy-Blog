@@ -37,6 +37,13 @@ export default function RootLayout({
         )}
       </head>
       <body className={`${playfair.variable} ${inter.variable} antialiased min-h-screen flex flex-col`}>
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-YBP2XM1G6N" strategy="afterInteractive" />
+        <Script id="google-analytics" strategy="afterInteractive">{`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-YBP2XM1G6N');
+        `}</Script>
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
