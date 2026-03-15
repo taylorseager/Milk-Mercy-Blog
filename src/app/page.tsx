@@ -11,20 +11,20 @@ export default function HomePage() {
       <section className="bg-stone-50 border-b border-stone-100">
         <div className="max-w-2xl mx-auto px-6 py-20">
           <h1 className="font-serif text-4xl sm:text-5xl text-stone-900 leading-tight mb-8">
-            Welcome to Milk &amp; Mercy
+            Welcome to Milk &amp; Honey
           </h1>
           <div className="prose">
             <p>Hello, and welcome!</p>
             <p>
-              I&apos;m so glad you found your way here. <em>Milk &amp; Mercy</em> is a little
+              I&apos;m so glad you found your way here. <em>Milk &amp; Honey</em> is a little
               corner of the internet I&apos;m building as a place to share things about my journey into motherhood, and how God is shaping and forming me as I grow in my Christlikeness. Just a space to be real about all things life.
             </p>
-            <h2>Why &ldquo;Milk &amp; Mercy&rdquo;?</h2>
+            <h2>Why &ldquo;Milk &amp; Honey&rdquo;?</h2>
             <p>
-              <strong><u>Milk</u></strong>: nourishing, simple, honest. Specifically, in regards to 1 Peter 2:2.
+              <strong><u>Milk</u></strong>: nourishing, simple, honest. A substance that helps us grow - 1 Peter 2:2
             </p>
             <p>
-              <strong><u>Mercy</u></strong>: undeserved, gentle, and always available — even on the hardest days.
+              <strong><u>Honey</u></strong>: sweet, abundant, blessing. A picture of God&apos;s goodness poured out — Exodus 3:8
             </p>
             <p>
               Together, they represent what I hope this space becomes for you (and for me): something that
