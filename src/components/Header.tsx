@@ -8,13 +8,13 @@ export default function Header() {
         <Link href="/" className="flex items-center">
           <Image
             src="/logo.svg"
-            alt="Milk & Mercy"
+            alt="Milk & Honey"
             width={60}
             height={36}
             priority
           />
           <span className="ml-3 font-serif text-xl text-stone-900 tracking-wide">
-            Milk &amp; Mercy
+            Milk &amp; Honey
           </span>
         </Link>
         <nav className="flex items-center gap-8">
