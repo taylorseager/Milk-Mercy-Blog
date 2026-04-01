@@ -4,7 +4,7 @@ This file provides guidance to Claude Code when working with this repository.
 
 ## Project Overview
 
-**Milk & Mercy** — a Next.js 15 blog built with the App Router, TypeScript, and Tailwind CSS v4. Deployed to Vercel.
+**Milk & Honehy** — a Next.js 15 blog built with the App Router, TypeScript, and Tailwind CSS v4. Deployed to Vercel.
 
 ## Development Commands
 

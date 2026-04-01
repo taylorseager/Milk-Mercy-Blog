@@ -15,9 +15,9 @@ export async function generateMetadata({
   const { slug } = await params;
   try {
     const post = await getPostBySlug(slug);
-    return { title: `${post.title} | Milk & Mercy` };
+    return { title: `${post.title} | Milk & Honey` };
   } catch {
-    return { title: 'Post Not Found | Milk & Mercy' };
+    return { title: 'Post Not Found | Milk & Honey' };
   }
 }
 

@@ -11,7 +11,7 @@ function formatDate(dateStr: string) {
 }
 
 export const metadata = {
-  title: 'All Posts | Milk & Mercy',
+  title: 'All Posts | Milk & Honey',
 };
 
 export default function BlogIndexPage() {

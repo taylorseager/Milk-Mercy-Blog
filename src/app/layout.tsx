@@ -18,7 +18,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Milk & Mercy',
+  title: 'Milk & Honey',
   description: 'A place to slow down, reflect, and find grace in the everyday.',
 };
 
